@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2457d6">
+<meta name="description" content="Тренажер значень тригонометричних функцій sin, cos, tan, cot для особливих кутів.">
+<title>Тренажер тригонометричних значень</title>
+<style>
+:root{
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  color:#172033;background:#f3f6fb;
+  --accent:#2457d6;--accent-soft:#e8eefc;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{overflow-x:hidden}
+body{
+  margin:0;
+  padding:16px;
+  padding-bottom:max(16px,env(safe-area-inset-bottom));
+  min-height:100dvh;
+  display:flex;justify-content:center;align-items:flex-start;
+}
+.app{
+  width:min(100%,680px);
+  background:#fff;border-radius:22px;
+  padding:clamp(18px,4vw,30px);
+  box-shadow:0 12px 40px #17203314;
+}
+h1{font-size:clamp(1.3rem,4vw,2rem);text-align:center;margin:0 0 8px}
+.sub{text-align:center;color:#637083;margin:0 0 22px;line-height:1.4}
+.setup{
+  display:flex;flex-wrap:wrap;gap:12px;align-items:end;justify-content:center;
+  background:#f5f7fb;border-radius:14px;padding:14px;margin-bottom:22px;
+}
+label{display:flex;flex-direction:column;gap:6px;font-size:.92rem;font-weight:650}
+select,button{font:inherit}
+select{
+  border:1px solid #cbd5e1;border-radius:10px;padding:10px;
+  background:#fff;color:#172033;min-height:44px;
+}
+button{
+  cursor:pointer;border:0;border-radius:12px;padding:12px 16px;
+  font-weight:700;transition:transform .08s,opacity .15s;
+  touch-action:manipulation;min-height:44px;
+}
+button:active{transform:scale(.98)}
+button:focus-visible{outline:3px solid #8ba8f5;outline-offset:2px}
+.primary{background:var(--accent);color:#fff}
+.secondary{background:var(--accent-soft);color:#1c429d}
+#questionCard{text-align:center;padding:20px 10px 12px}
+.kicker{font-size:.9rem;color:#68758a}
+.question{font-size:clamp(2rem,8vw,3.5rem);font-weight:800;letter-spacing:.01em;margin:10px 0 8px;line-height:1.15}
+.prompt{color:#657186;margin:0}
+.answers{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;margin:20px 0;
+}
+.answer{
+  background:#f1f5fb;border:2px solid transparent;color:#1d2b43;
+  min-height:60px;font-size:clamp(1rem,3.5vw,1.2rem);
+  overflow-wrap:anywhere;padding:10px;
+}
+.answer:hover:not(:disabled){border-color:#8ba8f5;background:#e9efff}
+.answer:disabled{cursor:default;opacity:1}
+.answer.correct{background:#e3f8e9;border-color:#27934a;color:#145c2a}
+.answer.wrong{background:#ffebeb;border-color:#d43c3c;color:#8c1c1c}
+.feedback{
+  min-height:52px;text-align:center;padding:12px;border-radius:12px;
+  background:#f7f9fc;line-height:1.45;
+}
+.feedback.good{background:#e3f8e9;color:#145c2a}
+.feedback.bad{background:#fff0f0;color:#8c1c1c}
+.controls{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.progress{height:8px;background:#e8edf5;border-radius:99px;overflow:hidden;margin:12px 0 2px}
+.progressbar{height:100%;width:0;background:#3769e8;transition:width .2s}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0}
+.stat{background:#f3f6fb;border-radius:12px;padding:14px 8px;text-align:center}
+.stat strong{display:block;font-size:1.55rem}
+.stat span{font-size:.82rem;color:#647084}
+.hidden{display:none!important}
+.footer{text-align:center;color:#7b8798;font-size:.8rem;margin-top:22px;line-height:1.5}
+.counter-note{text-align:center;color:#8b96a8;font-size:.78rem;margin:6px 0 0}
+@media(max-width:480px){
+  body{padding:10px}
+  .app{border-radius:16px}
+  .answers{gap:8px}
+  .answer{padding:10px 6px;min-height:56px}
+  .setup{justify-content:stretch}
+  .setup label,.setup select,.setup button{width:100%}
+  .controls button{flex:1 1 auto}
+}
+@media(max-width:360px){
+  body{padding:6px}
+  .app{padding:12px;border-radius:14px}
+  .answers{grid-template-columns:1fr}
+  .question{font-size:clamp(1.8rem,10vw,2.4rem)}
+}
+@media(prefers-reduced-motion:reduce){
+  *{transition:none!important}
+  button:active{transform:none}
+}
+</style>
+</head>
+<body>
+<main class="app">
+  <h1>Тренажер тригонометрії</h1>
+  <p class="sub">Запам’ятовуй значення sin, cos, tan і cot для особливих кутів</p>
+
+  <section id="setup" class="setup">
+    <label>Кількість запитань
+      <select id="count">
+        <option value="10">10 запитань</option>
+        <option value="15">15 запитань</option>
+        <option value="20" selected>20 запитань</option>
+        <option value="30">30 запитань</option>
+        <option value="50">50 запитань</option>
+      </select>
+    </label>
+    <label>Функції
+      <select id="functions">
+        <option value="all" selected>sin, cos, tan, cot</option>
+        <option value="trig34">sin, cos, tan</option>
+        <option value="sin">Лише sin</option>
+        <option value="cos">Лише cos</option>
+        <option value="tan">Лише tan</option>
+        <option value="cot">Лише cot</option>
+      </select>
+    </label>
+    <button id="start" class="primary">Почати тест</button>
+  </section>
+
+  <section id="quiz" class="hidden">
+    <div class="kicker" id="counter">Запитання 1 із 20</div>
+    <div class="progress"><div class="progressbar" id="progressbar"></div></div>
+    <div id="questionCard">
+      <div class="question" id="question">sin 45°</div>
+      <p class="prompt">Вибери правильне значення</p>
+    </div>
+    <div class="answers" id="answers"></div>
+    <div class="feedback" id="feedback" aria-live="polite">Обери одну з восьми відповідей.</div>
+    <div class="controls">
+      <button id="next" class="primary hidden">Наступне запитання →</button>
+    </div>
+  </section>
+
+  <section id="results" class="hidden">
+    <h2 style="text-align:center;margin-top:6px">Результат тесту</h2>
+    <div class="stats">
+      <div class="stat"><strong id="score">0/20</strong><span>Правильних</span></div>
+      <div class="stat"><strong id="percent">0%</strong><span>Результат</span></div>
+      <div class="stat"><strong id="wrongCount">0</strong><span>Помилок</span></div>
+    </div>
+    <p id="summary" style="text-align:center;line-height:1.5"></p>
+    <div class="controls">
+      <button id="again" class="primary">Пройти ще раз</button>
+      <button id="settings" class="secondary">Змінити налаштування</button>
+    </div>
+  </section>
+  <p class="footer">Значення подано точно, через дроби та корені.</p>
+  <p class="counter-note" id="counter-note" aria-live="polite"></p>
+</main>
+<script>
+(() => {
+  "use strict";
+
+  /* ------------------------------------------------------------------
+     ЛІЧИЛЬНИК ЗАПУСКІВ
+     GitHub Pages не вміє писати у файли репозиторію — тому лічильник
+     бере дані із зовнішнього безкоштовного сервісу (без ключів).
+     Щоб ВИМКНУТИ лічильник — поставте COUNTER_ENABLED = false.
+     Щоб ЗМІНИТИ назву (щоб мати свій лічильник) — задайте свій namespace.
+     ------------------------------------------------------------------ */
+  const COUNTER_ENABLED = true;
+  const COUNTER_NAMESPACE = "oroses-trig-trainer-v2";   // унікальний ключ проєкту (можна змінити на свій)
+  const COUNTER_KEY = "launches";
+
+  // --- Рівень 1: онлайн-лічильник (Abacus). Єдиний публічний сервіс,
+  //     який відповідав на живі запити при перевірці. Без реєстрації й ключів.
+  //     /hit/ — збільшує на 1 і повертає нове число; /get/ — лише читає.
+  const COUNTER_HIT = `https://abacus.jasoncameron.dev/hit/${COUNTER_NAMESPACE}/${COUNTER_KEY}`;
+  const COUNTER_GET = `https://abacus.jasoncameron.dev/get/${COUNTER_NAMESPACE}/${COUNTER_KEY}`;
+
+  // --- Рівень 2: локальний резерв. Працює навіть якщо всі сервіси мертві
+  //     або користувач офлайн. Рахує запуски на цьому пристрої.
+  const LOCAL_COUNT_KEY = "trig-trainer-local-launches";
+
+  // Захист від подвійного зарахування одного відкриття (F5 / навігація).
+  const COUNTER_SESSION_KEY = "trig-trainer-counted";
+
+  function readLocalCount() {
+    try {
+      const v = parseInt(localStorage.getItem(LOCAL_COUNT_KEY) || "0", 10);
+      return Number.isFinite(v) ? v : 0;
+    } catch (e) { return 0; }
+  }
+
+  function bumpLocalCount() {
+    try {
+      const n = readLocalCount() + 1;
+      localStorage.setItem(LOCAL_COUNT_KEY, String(n));
+      return n;
+    } catch (e) { return 0; }
+  }
+
+  async function fetchOnlineCounter(alreadyCounted) {
+    const url = alreadyCounted ? COUNTER_GET : COUNTER_HIT;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 6000);   // не чекаємо довше 6 с
+    try {
+      const res = await fetch(url, { cache: "no-store", signal: controller.signal });
+      if (!res.ok) throw new Error("bad status " + res.status);
+      const data = await res.json();
+      const n = data && data.value;
+      if (typeof n !== "number") throw new Error("no count field");
+      return n;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function bumpCounter() {
+    if (!COUNTER_ENABLED) return;
+    const note = document.getElementById("counter-note");
+    if (!note) return;
+
+    // Чи вже рахували в цій сесії (щоб F5 не накручував).
+    let alreadyCounted = false;
+    try { alreadyCounted = sessionStorage.getItem(COUNTER_SESSION_KEY) === "1"; } catch (e) {}
+
+    // Локальний резерв рахуємо завжди — він ніколи не підводить.
+    const localN = alreadyCounted ? readLocalCount() : bumpLocalCount();
+
+    try {
+      const onlineN = await fetchOnlineCounter(alreadyCounted);
+      if (!alreadyCounted) {
+        try { sessionStorage.setItem(COUNTER_SESSION_KEY, "1"); } catch (e) {}
+      }
+      // Показуємо більше з двох: онлайн-лічильник зазвичай більший,
+      // бо враховує всіх відвідувачів.
+      const shown = Math.max(onlineN, localN);
+      note.textContent = `Тренажер відкрито ${shown.toLocaleString("uk-UA")} разів.`;
+
+      // Якщо онлайн-сервіс явно відстав від локального (або навпаки) —
+      // це нормально, числа з різних джерел. Обидва зберігаються.
+    } catch (e) {
+      // Онлайн недоступний? Показуємо локальне число і чесно про це пишемо.
+      try { sessionStorage.setItem(COUNTER_SESSION_KEY, "1"); } catch (e2) {}
+      if (localN > 0) {
+        note.textContent = `Тренажер відкрито ${localN.toLocaleString("uk-UA")} разів (на цьому пристрої).`;
+      } else {
+        note.textContent = "";
+      }
+    }
+  }
+
+  const $ = id => document.getElementById(id);
+
+  /* Значення подано точно, через дроби та корені.
+     "—" = значення не існує для цього кута (tan 90°, cot 0°).
+     Так прийнято записувати в шкільній математиці. */
+  const angles = [
+    {deg:0,  rad:"0"},
+    {deg:30, rad:"π/6"},
+    {deg:45, rad:"π/4"},
+    {deg:60, rad:"π/3"},
+    {deg:90, rad:"π/2"}
+  ];
+  const values = {
+    sin: ["0", "1/2", "√2/2", "√3/2", "1"],
+    cos: ["1", "√3/2", "√2/2", "1/2", "0"],
+    tan: ["0", "√3/3", "1", "√3", "—"],
+    cot: ["—", "√3", "1", "√3/3", "0"]
+  };
+  const functionNames = {sin:"sin", cos:"cos", tan:"tan", cot:"cot"};
+
+  let questions = [], index = 0, correct = 0, answered = false, misses = 0;
+
+  function selectFunctions() {
+    const v = $("functions").value;
+    if (v === "all") return ["sin","cos","tan","cot"];
+    if (v === "trig34") return ["sin","cos","tan"];
+    return [v];
+  }
+
+  function makeQuestions() {
+    const selected = selectFunctions();
+    const pool = [];
+    selected.forEach(fn => angles.forEach((angle, i) => {
+      // Питання включаємо для всіх кутів, у т.ч. де значення не існує ("—").
+      pool.push({fn, angle, answer: values[fn][i]});
+    }));
+    shuffle(pool);
+
+    const count = Number($("count").value);
+    questions = [];
+    while (questions.length < count) {
+      if (questions.length && questions.length % pool.length === 0) {
+        const copy = pool.slice();
+        shuffle(copy);
+        questions.push(...copy.slice(0, Math.min(copy.length, count - questions.length)));
+      } else {
+        questions.push(pool[questions.length % pool.length]);
+      }
+    }
+    // Для кожного питання незалежно обираємо градуси або радіани.
+    questions = questions.slice(0, count).map(q => ({...q, unit: Math.random() < .5 ? "deg" : "rad"}));
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function makeOptions(q) {
+    // Усі наявні значення + правдоподібні дистрактори. Виключаємо лише
+    // те, що збігається з правильною відповіддю, щоб кнопки були унікальні.
+    const all = [...new Set(Object.values(values).flat())];
+    const extra = ["2","√3/4","√2","√3/6","3/2","1/√2","√6/2","2/√3","√5/2","1/3","2/3","5/4"];
+    const distractors = shuffle([...new Set([...all, ...extra])].filter(v => v !== q.answer)).slice(0, 7);
+    return shuffle([q.answer, ...distractors]);
+  }
+
+  function start() {
+    makeQuestions();
+    index = 0; correct = 0; misses = 0; answered = false;
+    $("setup").classList.add("hidden");
+    $("results").classList.add("hidden");
+    $("quiz").classList.remove("hidden");
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    answered = false;
+    const q = questions[index];
+    const angle = q.unit === "deg" ? `${q.angle.deg}°` : q.angle.rad;
+    $("counter").textContent = `Запитання ${index + 1} із ${questions.length}`;
+    $("progressbar").style.width = `${index / questions.length * 100}%`;
+    $("question").textContent = `${functionNames[q.fn]} ${angle}`;
+    $("answers").innerHTML = "";
+    $("feedback").className = "feedback";
+    $("feedback").textContent = "Обери одну з восьми відповідей.";
+    $("next").classList.add("hidden");
+    makeOptions(q).forEach(value => {
+      const b = document.createElement("button");
+      b.className = "answer";
+      b.type = "button";
+      b.textContent = value;
+      b.addEventListener("click", () => choose(b, value, q));
+      $("answers").appendChild(b);
+    });
+    window.scrollTo({top: 0, behavior: "smooth"});
+  }
+
+  function choose(button, value, q) {
+    if (answered) return;
+    answered = true;
+    const buttons = [...$("answers").querySelectorAll("button")];
+    buttons.forEach(b => {
+      b.disabled = true;
+      if (b.textContent === q.answer) b.classList.add("correct");
+    });
+    if (value === q.answer) {
+      correct++;
+      $("feedback").className = "feedback good";
+      $("feedback").textContent = "Правильно! Чудова робота.";
+    } else {
+      misses++;
+      button.classList.add("wrong");
+      $("feedback").className = "feedback bad";
+      $("feedback").textContent = `Не зовсім. Правильна відповідь: ${q.answer}.`;
+    }
+    $("progressbar").style.width = `${(index + 1) / questions.length * 100}%`;
+    $("next").textContent = index === questions.length - 1 ? "Показати результат" : "Наступне запитання →";
+    $("next").classList.remove("hidden");
+  }
+
+  function showResults() {
+    $("quiz").classList.add("hidden");
+    $("results").classList.remove("hidden");
+    const total = questions.length;
+    const pct = Math.round(correct / total * 100);
+    $("score").textContent = `${correct}/${total}`;
+    $("percent").textContent = `${pct}%`;
+    $("wrongCount").textContent = misses;
+    $("summary").textContent = pct === 100
+      ? "Бездоганно! Ти чудово знаєш значення тригонометричних функцій."
+      : pct >= 80
+      ? "Дуже добре! Ще трохи практики — і значення будуть легко згадуватися."
+      : pct >= 60
+      ? "Хороший початок. Повтори значення особливих кутів і спробуй ще раз."
+      : "Варто ще раз повторити таблицю значень. Спробуй пройти тест знову.";
+    $("progressbar").style.width = "100%";
+  }
+
+  $("start").addEventListener("click", start);
+  $("next").addEventListener("click", () => {
+    if (index < questions.length - 1) { index++; renderQuestion(); }
+    else showResults();
+  });
+  $("again").addEventListener("click", start);
+  $("settings").addEventListener("click", () => {
+    $("results").classList.add("hidden");
+    $("setup").classList.remove("hidden");
+  });
+
+  // Запускаємо лічильник після завантаження сторінки.
+  bumpCounter();
+})();
+</script>
+</body>
+</html>
